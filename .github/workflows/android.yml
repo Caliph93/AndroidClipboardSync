@@ -11,6 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # اختیاری: نمایش مسیر فعلی و محتوای آن
+      - name: Show workspace
+        run: |
+          pwd
+          ls -la
+
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
@@ -18,25 +24,20 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
+      - name: Verify Gradle wrapper and build files
+        run: |
+          test -f ./gradlew && echo "gradlew OK"
+          test -f ./settings.gradle && echo "settings.gradle OK"
+          test -f ./build.gradle && echo "root build.gradle OK"
+
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
         run: ./gradlew clean assembleDebug
-
-      - name: Zip entire source
-        run: |
-          cd ..
-          zip -r AndroidClipboardSync.zip AndroidClipboardSync
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/
-
-      - name: Upload Source Zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: source-zip
-          path: ../AndroidClipboardSync.zip
